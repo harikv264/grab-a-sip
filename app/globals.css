@@ -3,25 +3,77 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --font-display: "Bricolage Grotesque", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-ink text-cream font-sans antialiased;
+    background-image: radial-gradient(
+        ellipse 80% 50% at 50% -10%,
+        rgba(168, 85, 247, 0.18),
+        transparent 60%
+      ),
+      radial-gradient(
+        ellipse 60% 40% at 100% 0%,
+        rgba(56, 245, 201, 0.12),
+        transparent 55%
+      );
+    background-attachment: fixed;
+  }
+  ::selection {
+    @apply bg-lime text-ink;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display font-semibold tracking-tight;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .glass {
+    @apply border border-white/10 bg-white/[0.04] backdrop-blur-xl;
+  }
+  .glass-strong {
+    @apply border border-white/15 bg-white/[0.07] backdrop-blur-2xl;
+  }
+  .chip {
+    @apply inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-sm text-muted;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-lime px-6 py-3 font-semibold text-ink
+      transition-all duration-300 hover:shadow-glow hover:brightness-105 active:scale-95;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-white/20 px-6 py-3
+      font-semibold text-cream transition-all duration-300 hover:border-white/40 hover:bg-white/5 active:scale-95;
+  }
+  .section {
+    @apply mx-auto w-full max-w-7xl px-5 sm:px-8;
+  }
+  .gradient-text {
+    @apply bg-gradient-to-r from-lime via-mango to-berry bg-clip-text text-transparent;
+    background-size: 200% auto;
+    @apply animate-shimmer;
+  }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  /* Hide scrollbar for marquees */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }

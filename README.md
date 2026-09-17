@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Grab A Sip — Website (Phase 1: UI)
 
-## Getting Started
+Modern, mobile-first marketing site for **Grab A Sip** — cold-pressed juices &
+loaded fruit bowls, delivered fresh Mon–Sat.
 
-First, run the development server:
+## Stack
+
+- **Next.js 14** (App Router) + **TypeScript**
+- **Tailwind CSS** — custom "Liquid Neon" design system
+- **Framer Motion** — scroll + entrance animation
+- Self-contained inline SVG icons (no icon dependency)
+- Fonts: Bricolage Grotesque (display) + Inter (body) via `next/font`
+
+Zero runtime backend in Phase 1 — all content is static data in
+[`lib/data.ts`](lib/data.ts), ready to be swapped for API/Supabase calls.
+
+## Pages
+
+| Route       | Contents                                                            |
+| ----------- | ------------------------------------------------------------------- |
+| `/`         | Hero, mission/purpose/promise, benefits, product & plan previews, how-it-works, CTA |
+| `/products` | All 4 products with details + Small vs Large comparison             |
+| `/plans`    | Pricing, delivery logic (24–26 boxes), pause policy, FAQ            |
+
+Every CTA opens WhatsApp chat to **+91 83281 16438** with a prefilled message.
+
+## Run locally
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev      # http://localhost:3000
+npm run build    # production build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Deploy to Vercel
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+This is a standard Next.js app — Vercel auto-detects everything.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Option A — via GitHub (recommended):**
+1. Push this folder to a GitHub repo.
+2. On [vercel.com](https://vercel.com) → **Add New → Project** → import the repo.
+3. Framework preset: **Next.js** (auto). No env vars needed for Phase 1. Deploy.
 
-## Learn More
+**Option B — via CLI:**
+```bash
+npm i -g vercel
+vercel          # preview deploy
+vercel --prod   # production deploy
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Editing content
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+All copy, prices, products, plans and delivery facts live in
+[`lib/data.ts`](lib/data.ts). Change a price or blurb there and it updates
+everywhere on the site.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Phase 2 (planned)
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Java (Spring Boot) backend + Supabase (Postgres) — plans/orders/subscribers
+- Next.js API routes (`app/api/*`) as a thin proxy to the Java service
+- In-site chatbot
+- Automated WhatsApp responses (location check → conversion flow)
