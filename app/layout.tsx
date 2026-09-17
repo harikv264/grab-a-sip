@@ -17,6 +17,9 @@ const body = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "https://grab-a-sip.vercel.app"
+  ),
   title: "Grab A Sip — Fresh juices & fruit bowls, delivered daily",
   description:
     "Cold-pressed juices and loaded fruit bowls delivered fresh to your door, Monday to Saturday. Flexible monthly plans, zero added sugar. Grab A Sip.",

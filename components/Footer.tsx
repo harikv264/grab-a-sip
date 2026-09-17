@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Instagram, MessageCircle } from "@/components/icons";
 import { BRAND, NAV_LINKS, whatsappLink } from "@/lib/data";
 
@@ -13,9 +14,13 @@ export function Footer() {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2.5">
-              <span className="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-lime via-mango to-berry text-xl">
-                🥤
-              </span>
+              <Image
+                src="/mascot.png"
+                alt="Grab A Sip mascot"
+                width={44}
+                height={68}
+                className="h-14 w-auto"
+              />
               <span className="font-display text-xl font-bold">
                 Grab<span className="text-lime">A</span>Sip
               </span>

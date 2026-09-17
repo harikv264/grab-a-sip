@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Menu, X, MessageCircle } from "@/components/icons";
@@ -34,10 +35,15 @@ export function Navbar() {
           }`}
         >
           {/* Logo */}
-          <Link href="/" className="group flex items-center gap-2.5">
-            <span className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-lime via-mango to-berry text-lg shadow-glow transition-transform group-hover:scale-110">
-              🥤
-            </span>
+          <Link href="/" className="group flex items-center gap-2">
+            <Image
+              src="/mascot.png"
+              alt="Grab A Sip mascot"
+              width={40}
+              height={62}
+              priority
+              className="h-11 w-auto drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] transition-transform group-hover:scale-110"
+            />
             <span className="font-display text-lg font-bold tracking-tight">
               Grab<span className="text-lime">A</span>Sip
             </span>
