@@ -49,6 +49,28 @@ export function ProductCard({ product }: { product: Product }) {
         ))}
       </ul>
 
+      {/* Good for — health benefit tags */}
+      <div className="relative mt-6">
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-muted">
+          Good for
+        </p>
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {product.goodFor.map((g) => (
+            <span
+              key={g}
+              className="rounded-full border px-2.5 py-1 text-xs font-medium"
+              style={{
+                borderColor: `${product.accent}44`,
+                background: `${product.accent}14`,
+                color: product.accent,
+              }}
+            >
+              {g}
+            </span>
+          ))}
+        </div>
+      </div>
+
       <div className="relative mt-auto pt-7">
         <div className="flex items-end justify-between">
           <div>

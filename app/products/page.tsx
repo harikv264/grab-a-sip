@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PRODUCTS } from "@/lib/data";
 import { ProductCard } from "@/components/ProductCard";
+import { ProductHealthBenefits } from "@/components/ProductHealthBenefits";
 import { PageHeader } from "@/components/PageHeader";
 import { Reveal } from "@/components/Reveal";
 
@@ -76,6 +77,9 @@ export default function ProductsPage() {
           </div>
         </Reveal>
       </section>
+
+      {/* Per-product health benefits */}
+      <ProductHealthBenefits />
     </div>
   );
 }
