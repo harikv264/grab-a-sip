@@ -54,9 +54,41 @@ All copy, prices, products, plans and delivery facts live in
 [`lib/data.ts`](lib/data.ts). Change a price or blurb there and it updates
 everywhere on the site.
 
-## Phase 2 (planned)
+## Phase 2 — Serviceability check & lead capture (shipped)
 
-- Java (Spring Boot) backend + Supabase (Postgres) — plans/orders/subscribers
-- Next.js API routes (`app/api/*`) as a thin proxy to the Java service
-- In-site chatbot
-- Automated WhatsApp responses (location check → conversion flow)
+A visitor enters their pincode/area on the home page (`#check`):
+- **We deliver** → success card + deep link to WhatsApp to convert.
+- **Not yet** → "coming soon" + optional phone capture. The wanted area is
+  logged as demand, so you know where to expand next.
+
+**Files:** [`lib/serviceability.ts`](lib/serviceability.ts) (the delivery-area
+list — edit this with your real pincodes), [`components/ServiceabilityCheck.tsx`](components/ServiceabilityCheck.tsx),
+[`app/api/leads/route.ts`](app/api/leads/route.ts) (lead capture),
+[`app/api/leads/export/route.ts`](app/api/leads/export/route.ts) (CSV export).
+
+### It works with no setup…
+The check runs off the static list in `lib/serviceability.ts`. Leads just
+aren't persisted until Supabase is connected (the API safely no-ops).
+
+### …turn on lead storage + export (≈5 min)
+1. Create a project at [supabase.com](https://supabase.com).
+2. SQL Editor → run [`supabase/schema.sql`](supabase/schema.sql).
+3. In **Vercel → Settings → Environment Variables** add (see `.env.example`):
+   - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (Supabase → Settings → API)
+   - `ADMIN_TOKEN` (any long random string)
+4. Redeploy. Now every check is stored, and you can download the
+   **undelivered areas** as an Excel-ready CSV:
+   `https://YOUR-SITE/api/leads/export?token=YOUR_ADMIN_TOKEN`
+   (add `&all=1` for every lead).
+
+> **Edit your delivery areas** in `lib/serviceability.ts` — replace the SAMPLE
+> pincodes/localities with the real ones. (Later this can move into the
+> `service_areas` DB table and be managed from the admin.)
+
+## Phase 3+ (planned)
+
+- Java (Spring Boot) backend on Render/Railway — reads the same Supabase DB
+- Admin dashboard: customers, subscriptions, deliveries, inventory
+- WhatsApp FAQ chatbot + outbound notifications
+
+See the full architecture: the phased roadmap artifact shared in-app.

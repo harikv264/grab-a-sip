@@ -90,8 +90,8 @@ export function Hero() {
             <MessageCircle size={18} strokeWidth={2.5} />
             Start on WhatsApp
           </a>
-          <Link href="/plans" className="btn-ghost w-full sm:w-auto">
-            See the plans
+          <Link href="/#check" className="btn-ghost w-full sm:w-auto">
+            Do we deliver to you?
             <ArrowRight size={18} />
           </Link>
         </motion.div>
