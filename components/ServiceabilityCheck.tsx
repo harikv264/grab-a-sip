@@ -6,6 +6,7 @@ import { MessageCircle, Check, ArrowRight } from "@/components/icons";
 import {
   checkServiceability,
   SERVICE_CITY,
+  LOCALITY_OPTIONS,
   type ServiceResult,
 } from "@/lib/serviceability";
 import { whatsappLink } from "@/lib/data";
@@ -86,10 +87,17 @@ export function ServiceabilityCheck() {
               value={value}
               onChange={(e) => setValue(e.target.value)}
               inputMode="text"
-              placeholder="Pincode or area (e.g. 500081)"
-              aria-label="Your pincode or area"
+              list="served-localities"
+              autoComplete="off"
+              placeholder="Your area (e.g. Gachibowli) or pincode"
+              aria-label="Your area or pincode"
               className="w-full rounded-full border border-white/15 bg-white/5 px-5 py-3.5 text-cream placeholder:text-muted/70 outline-none transition focus:border-lime/60 focus:bg-white/[0.08]"
             />
+            <datalist id="served-localities">
+              {LOCALITY_OPTIONS.map((l) => (
+                <option key={l} value={l} />
+              ))}
+            </datalist>
             <button type="submit" className="btn-primary shrink-0">
               Check
               <ArrowRight size={18} />
@@ -107,10 +115,13 @@ export function ServiceabilityCheck() {
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                 className="mx-auto mt-6 max-w-md"
               >
-                {result.status === "invalid" && (
-                  <p className="text-sm text-mango">
-                    Please enter a 6-digit pincode or your area name.
-                  </p>
+                {result.status === "ask_again" && (
+                  <div className="rounded-3xl border border-mango/30 bg-mango/10 p-5 text-left">
+                    <p className="text-sm font-medium text-mango">
+                      {result.message ??
+                        "Please enter your area (e.g. Gachibowli) or 6-digit pincode."}
+                    </p>
+                  </div>
                 )}
 
                 {result.status === "serviceable" && (
