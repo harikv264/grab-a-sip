@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 const TABS = [
   { label: "Leads", href: "/admin" },
   { label: "Customers", href: "/admin/customers" },
+  { label: "Subscriptions", href: "/admin/subscriptions" },
 ];
 
 export function AdminHeader({ email }: { email: string }) {

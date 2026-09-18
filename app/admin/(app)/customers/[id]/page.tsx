@@ -48,9 +48,19 @@ export default async function EditCustomerPage({
         <Link href="/admin/customers" className="text-sm text-muted hover:text-cream">
           ← Customers
         </Link>
-        <h1 className="mt-2 font-display text-3xl font-bold">
-          {c ? c.name : "Customer"}
-        </h1>
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
+          <h1 className="font-display text-3xl font-bold">
+            {c ? c.name : "Customer"}
+          </h1>
+          {c && (
+            <Link
+              href={`/admin/subscriptions/new?customerId=${c.id}`}
+              className="btn-ghost text-sm"
+            >
+              + Start a subscription
+            </Link>
+          )}
+        </div>
       </div>
 
       {!c ? (
