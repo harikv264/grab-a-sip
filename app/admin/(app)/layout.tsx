@@ -16,12 +16,13 @@ export default async function AdminAppLayout({
   } = await supabase.auth.getUser();
   if (!user) redirect("/admin/login");
 
-  // Role gate: a provisioned non-admin (rider/customer) can't be here.
-  // If we can't resolve the role (backend cold / not provisioned), stay lenient
-  // — the API still protects data — so the owner is never locked out.
+  // Role gate: /admin is admin-only. When the backend is reachable and this
+  // user isn't an admin (a rider/customer, or an unprovisioned account), deny.
+  // `me === null` means we couldn't reach the backend — stay lenient there so a
+  // cold start never locks the owner out (data is still API-protected anyway).
   const me = await fetchMe();
-  if (me?.provisioned && me.role && me.role !== "admin") {
-    redirect("/admin/login");
+  if (me && me.role !== "admin") {
+    redirect("/admin/no-access");
   }
 
   return (
