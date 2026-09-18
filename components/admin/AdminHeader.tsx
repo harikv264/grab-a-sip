@@ -10,7 +10,13 @@ const TABS = [
   { label: "Deliveries", href: "/admin/deliveries" },
 ];
 
-export function AdminHeader({ email }: { email: string }) {
+export function AdminHeader({
+  email,
+  role,
+}: {
+  email: string;
+  role?: string | null;
+}) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -58,6 +64,11 @@ export function AdminHeader({ email }: { email: string }) {
           </nav>
         </div>
         <div className="flex items-center gap-3 text-sm">
+          {role && (
+            <span className="hidden rounded-full bg-lime/15 px-2.5 py-0.5 text-xs font-semibold capitalize text-lime sm:inline">
+              {role}
+            </span>
+          )}
           <span className="hidden text-muted md:inline">{email}</span>
           <button
             onClick={signOut}
