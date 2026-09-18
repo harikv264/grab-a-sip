@@ -7,6 +7,7 @@ const TABS = [
   { label: "Leads", href: "/admin" },
   { label: "Customers", href: "/admin/customers" },
   { label: "Subscriptions", href: "/admin/subscriptions" },
+  { label: "Deliveries", href: "/admin/deliveries" },
 ];
 
 export function AdminHeader({ email }: { email: string }) {
