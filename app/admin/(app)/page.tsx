@@ -1,6 +1,4 @@
-import { redirect } from "next/navigation";
-import { createSupabaseServer } from "@/lib/supabase-server";
-import { AdminHeader } from "@/components/admin/AdminHeader";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -54,12 +52,6 @@ function fmtDate(iso: string | null): string {
 }
 
 export default async function AdminDashboard() {
-  const supabase = createSupabaseServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/admin/login");
-
   const { ok, leads, reason } = await getLeads();
 
   const undelivered = leads.filter((l) => !l.serviceable);
@@ -91,10 +83,8 @@ export default async function AdminDashboard() {
   ];
 
   return (
-    <div className="min-h-screen">
-      <AdminHeader email={user.email ?? ""} />
-
-      <div className="mx-auto max-w-6xl px-5 py-8">
+    <>
+      <div>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="font-display text-3xl font-bold">Leads &amp; demand</h1>
@@ -191,12 +181,13 @@ export default async function AdminDashboard() {
                     <th className="px-4 py-3 font-medium">Location</th>
                     <th className="px-4 py-3 font-medium">Result</th>
                     <th className="px-4 py-3 font-medium">Phone</th>
+                    <th className="px-4 py-3 font-medium"></th>
                   </tr>
                 </thead>
                 <tbody>
                   {recent.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="px-4 py-6 text-muted">
+                      <td colSpan={5} className="px-4 py-6 text-muted">
                         No checks recorded yet.
                       </td>
                     </tr>
@@ -223,6 +214,21 @@ export default async function AdminDashboard() {
                         <td className="whitespace-nowrap px-4 py-3 text-muted">
                           {l.phone || "—"}
                         </td>
+                        <td className="whitespace-nowrap px-4 py-3 text-right">
+                          {l.serviceable && (
+                            <Link
+                              href={`/admin/customers/new?${new URLSearchParams({
+                                ...(l.phone ? { phone: l.phone } : {}),
+                                ...(l.matchedArea ? { locality: l.matchedArea } : {}),
+                                ...(l.pincode ? { pincode: l.pincode } : {}),
+                                leadId: l.id,
+                              }).toString()}`}
+                              className="rounded-full border border-lime/30 bg-lime/10 px-2.5 py-1 text-xs font-semibold text-lime transition hover:bg-lime/20"
+                            >
+                              + Customer
+                            </Link>
+                          )}
+                        </td>
                       </tr>
                     ))
                   )}
@@ -232,6 +238,6 @@ export default async function AdminDashboard() {
           </section>
         </div>
       </div>
-    </div>
+    </>
   );
 }
