@@ -12,7 +12,12 @@ type LeadBody = {
   phone?: string;
 };
 
-/** Records a serviceability check as a lead. Safe no-op until Supabase is set up. */
+/**
+ * Records a serviceability check as a lead.
+ * - If API_BASE_URL (the Spring Boot backend) is set, forwards there server-side
+ *   (no CORS, backend URL never exposed to the browser).
+ * - Otherwise falls back to a Supabase insert, or a safe no-op if neither is set.
+ */
 export async function POST(req: Request) {
   let body: LeadBody | null = null;
   try {
@@ -21,7 +26,28 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "invalid body" }, { status: 400 });
   }
 
-  // Light validation / normalisation.
+  // Preferred path: forward to the Java backend, which owns persistence.
+  const apiBase = process.env.API_BASE_URL;
+  if (apiBase) {
+    try {
+      const res = await fetch(`${apiBase.replace(/\/+$/, "")}/api/leads`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      return NextResponse.json(
+        { ok: res.ok, stored: res.ok, via: "api" },
+        { status: res.ok ? 200 : 502 }
+      );
+    } catch {
+      return NextResponse.json(
+        { ok: false, error: "backend unreachable" },
+        { status: 502 }
+      );
+    }
+  }
+
+  // Fallback path: light validation / normalisation for a direct Supabase write.
   const pincode =
     typeof body.pincode === "string" && /^\d{6}$/.test(body.pincode)
       ? body.pincode

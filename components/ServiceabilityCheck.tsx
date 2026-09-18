@@ -11,13 +11,11 @@ import {
 } from "@/lib/serviceability";
 import { whatsappLink } from "@/lib/data";
 
-// Fire-and-forget lead logging.
-// Posts to the Spring Boot API when NEXT_PUBLIC_API_BASE_URL is set,
-// otherwise to the built-in Next.js route (safe no-op until Supabase).
+// Fire-and-forget lead logging. Posts to the site's own /api/leads route,
+// which forwards to the Java backend (API_BASE_URL) server-side.
 function logLead(payload: Record<string, unknown>) {
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL || "";
   try {
-    fetch(`${base}/api/leads`, {
+    fetch("/api/leads", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(payload),
