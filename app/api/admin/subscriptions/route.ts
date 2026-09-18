@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { requireAdminUser, backendConfig } from "@/lib/admin-proxy";
+import { isAdmin, backendConfig } from "@/lib/admin-proxy";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
-  if (!(await requireAdminUser()))
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await isAdmin()))
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   const be = backendConfig();
   if (!be) return NextResponse.json({ error: "Backend not configured" }, { status: 503 });
 
@@ -23,8 +23,8 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  if (!(await requireAdminUser()))
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await isAdmin()))
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   const be = backendConfig();
   if (!be) return NextResponse.json({ error: "Backend not configured" }, { status: 503 });
 

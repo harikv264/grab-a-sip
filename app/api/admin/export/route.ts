@@ -1,22 +1,18 @@
 import { NextResponse } from "next/server";
-import { createSupabaseServer } from "@/lib/supabase-server";
+import { isAdmin } from "@/lib/admin-proxy";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * Session-gated proxy: streams the .xlsx from the Java backend using the
+ * Admin-only proxy: streams the .xlsx from the Java backend using the
  * server-side admin token, but only for a signed-in admin. The backend token
  * never reaches the browser.
  *   GET /api/admin/export?all=1
  */
 export async function GET(req: Request) {
-  const supabase = createSupabaseServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return new NextResponse("Unauthorized", { status: 401 });
+  if (!(await isAdmin())) {
+    return new NextResponse("Forbidden", { status: 403 });
   }
 
   const base = process.env.API_BASE_URL;

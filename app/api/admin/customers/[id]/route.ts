@@ -1,16 +1,8 @@
 import { NextResponse } from "next/server";
-import { createSupabaseServer } from "@/lib/supabase-server";
+import { isAdmin } from "@/lib/admin-proxy";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-async function requireAdmin() {
-  const supabase = createSupabaseServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  return user;
-}
 
 function backend() {
   const base = process.env.API_BASE_URL;
@@ -23,8 +15,8 @@ export async function GET(
   _req: Request,
   { params }: { params: { id: string } }
 ) {
-  if (!(await requireAdmin()))
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await isAdmin()))
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   const be = backend();
   if (!be) return NextResponse.json({ error: "Backend not configured" }, { status: 503 });
 
@@ -40,8 +32,8 @@ export async function PUT(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  if (!(await requireAdmin()))
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await isAdmin()))
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   const be = backend();
   if (!be) return NextResponse.json({ error: "Backend not configured" }, { status: 503 });
 
