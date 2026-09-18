@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, Inter } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
-import { WhatsAppFloat } from "@/components/WhatsAppFloat";
 
 const display = Bricolage_Grotesque({
   subsets: ["latin"],
@@ -43,12 +40,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
-      <body className="min-h-screen overflow-x-hidden">
-        <Navbar />
-        <main>{children}</main>
-        <Footer />
-        <WhatsAppFloat />
-      </body>
+      <body className="min-h-screen overflow-x-hidden">{children}</body>
     </html>
   );
 }
