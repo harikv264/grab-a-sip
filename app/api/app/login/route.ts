@@ -6,28 +6,33 @@ import { toE164 } from "@/lib/phone";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** Rider/customer login by phone + password (interim until MSG91 phone-OTP). */
+/**
+ * Rider/customer login by password. Accepts either a phone (interim, until
+ * MSG91 phone-OTP) or an email (used by test accounts and email sign-ups).
+ */
 export async function POST(req: Request) {
   let phone = "";
+  let email = "";
   let password = "";
   try {
-    ({ phone, password } = await req.json());
+    ({ phone = "", email = "", password = "" } = await req.json());
   } catch {
     return NextResponse.json({ ok: false, error: "Invalid request" }, { status: 400 });
   }
-  const e164 = toE164(phone);
-  if (!e164 || !password) {
+
+  const useEmail = Boolean(email && email.includes("@"));
+  const e164 = useEmail ? "" : toE164(phone);
+  if ((!useEmail && !e164) || !password) {
     return NextResponse.json(
-      { ok: false, error: "Enter your phone number and password." },
+      { ok: false, error: "Enter your email or phone, and your password." },
       { status: 400 }
     );
   }
 
   const supabase = createSupabaseServer();
-  const { data, error } = await supabase.auth.signInWithPassword({
-    phone: e164,
-    password,
-  });
+  const { data, error } = await supabase.auth.signInWithPassword(
+    useEmail ? { email, password } : { phone: e164 as string, password }
+  );
   if (error || !data.session) {
     return NextResponse.json(
       { ok: false, error: error?.message || "Sign in failed." },

@@ -6,8 +6,10 @@ import { COUNTRIES, DEFAULT_COUNTRY, combineE164 } from "@/lib/countries";
 
 export default function AppLoginPage() {
   const router = useRouter();
+  const [mode, setMode] = useState<"phone" | "email">("phone");
   const [dial, setDial] = useState(DEFAULT_COUNTRY.dial);
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -15,9 +17,16 @@ export default function AppLoginPage() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    const e164 = combineE164(dial, phone);
-    if (!e164 || !password) {
-      setError("Enter a valid phone number and password.");
+    const body =
+      mode === "email"
+        ? { email: email.trim(), password }
+        : { phone: combineE164(dial, phone), password };
+    if ((mode === "email" ? !body.email : !body.phone) || !password) {
+      setError(
+        mode === "email"
+          ? "Enter your email and password."
+          : "Enter a valid phone number and password."
+      );
       return;
     }
     setLoading(true);
@@ -25,7 +34,7 @@ export default function AppLoginPage() {
       const res = await fetch("/api/app/login", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ phone: e164, password }),
+        body: JSON.stringify(body),
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {
@@ -61,31 +70,54 @@ export default function AppLoginPage() {
         </div>
 
         <form onSubmit={onSubmit} className="flex flex-col gap-3 rounded-4xl glass p-6">
-          <label className="text-sm">
-            <span className="mb-1 block text-muted">Phone number</span>
-            <div className="flex gap-2">
-              <select
-                value={dial}
-                onChange={(e) => setDial(e.target.value)}
-                aria-label="Country code"
-                className="rounded-2xl border border-white/15 bg-white/5 px-3 py-3 text-cream outline-none transition focus:border-lime/60"
-              >
-                {COUNTRIES.map((c) => (
-                  <option key={c.code} value={c.dial}>
-                    {c.flag} +{c.dial}
-                  </option>
-                ))}
-              </select>
+          {mode === "phone" ? (
+            <label className="text-sm">
+              <span className="mb-1 block text-muted">Phone number</span>
+              <div className="flex gap-2">
+                <select
+                  value={dial}
+                  onChange={(e) => setDial(e.target.value)}
+                  aria-label="Country code"
+                  className="rounded-2xl border border-white/15 bg-white/5 px-3 py-3 text-cream outline-none transition focus:border-lime/60"
+                >
+                  {COUNTRIES.map((c) => (
+                    <option key={c.code} value={c.dial}>
+                      {c.flag} +{c.dial}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="98765 43210"
+                  className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-cream outline-none transition focus:border-lime/60"
+                />
+              </div>
+            </label>
+          ) : (
+            <label className="text-sm">
+              <span className="mb-1 block text-muted">Email</span>
               <input
-                type="tel"
-                required
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="98765 43210"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
+                placeholder="you@example.com"
                 className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-cream outline-none transition focus:border-lime/60"
               />
-            </div>
-          </label>
+            </label>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              setMode(mode === "phone" ? "email" : "phone");
+              setError(null);
+            }}
+            className="-mt-1 self-start text-xs text-lime/80 underline-offset-2 hover:underline"
+          >
+            {mode === "phone" ? "Use email instead" : "Use phone instead"}
+          </button>
           <label className="text-sm">
             <span className="mb-1 block text-muted">Password</span>
             <input

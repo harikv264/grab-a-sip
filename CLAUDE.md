@@ -8,6 +8,8 @@ portals. The global `~/.claude/CLAUDE.md` owns *how to think*; this file owns
   reusable FX toolkit. Read before any UI / visual change.
 - **`docs/RULES.md`** — engineering rules for this repo (patterns, security,
   do/don't). Read before writing code.
+- **`docs/TESTING.md`** — how to log in as each persona (email/password test
+  users via `scripts/seed-test-users.mjs`), for testing the experience.
 
 ---
 
