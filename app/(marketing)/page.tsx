@@ -7,6 +7,7 @@ import { IngredientBenefits } from "@/components/home/IngredientBenefits";
 import { ProductsPreview } from "@/components/home/ProductsPreview";
 import { HowItWorks } from "@/components/home/HowItWorks";
 import { PlansPreview } from "@/components/home/PlansPreview";
+import { JuiceShowcase } from "@/components/home/JuiceShowcase";
 import { CTASection } from "@/components/home/CTASection";
 
 export default function Home() {
@@ -21,6 +22,7 @@ export default function Home() {
       <ProductsPreview />
       <HowItWorks />
       <PlansPreview />
+      <JuiceShowcase />
       <CTASection />
     </>
   );

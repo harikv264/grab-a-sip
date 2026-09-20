@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { fetchMe } from "@/lib/admin-api";
 import { userApiJson } from "@/lib/user-api";
 import { PortalHeader } from "@/components/portal/PortalHeader";
+import { JuiceGlass } from "@/components/JuiceGlass";
+import { planColors, MONTHLY_BOXES } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
@@ -60,40 +62,69 @@ export default async function CustomerPortal() {
     .filter((d) => d.status === "delivered" || d.status === "failed")
     .slice(0, 8);
 
+  const delivered = summary?.deliveredThisMonth ?? 0;
+  const monthPct = Math.min(100, Math.round((delivered / MONTHLY_BOXES) * 100));
+  const activeSubs = (subs ?? []).filter((s) => s.status === "active");
+  const heroColors = planColors(activeSubs[0]?.planName ?? subs?.[0]?.planName);
+
   return (
     <div className="min-h-screen">
       <PortalHeader title="Grab A Sip" subtitle="Your deliveries" />
       <main className="mx-auto max-w-3xl px-5 py-6">
         <h1 className="font-display text-2xl font-bold">Hi there 👋</h1>
 
-        {summary && (
-          <div className="mt-4 grid grid-cols-3 gap-3">
-            <div className="rounded-3xl glass p-4 text-center">
-              <div className="font-display text-2xl font-bold text-lime">
-                {summary.activeSubscriptions}
+        {/* Hero: this month's glass filling up */}
+        <div className="mt-4 overflow-hidden rounded-4xl glass">
+          <div className="flex flex-col items-center gap-6 p-6 sm:flex-row sm:p-8">
+            <JuiceGlass
+              pct={monthPct}
+              color={heroColors.fill}
+              garnishColor={heroColors.garnish}
+              size={150}
+              showPct
+            />
+            <div className="flex-1 text-center sm:text-left">
+              <div className="text-[11px] uppercase tracking-widest text-muted">
+                Your month, filling up
               </div>
-              <div className="mt-1 text-[11px] uppercase tracking-widest text-muted">
-                Active plans
+              <div className="mt-1 font-display text-3xl font-bold">
+                {delivered}
+                <span className="text-muted"> / {MONTHLY_BOXES} boxes</span>
               </div>
-            </div>
-            <div className="rounded-3xl glass p-4 text-center">
-              <div className="font-display text-2xl font-bold">
-                {summary.deliveredThisMonth}
-              </div>
-              <div className="mt-1 text-[11px] uppercase tracking-widest text-muted">
-                This month
-              </div>
-            </div>
-            <div className="rounded-3xl glass p-4 text-center">
-              <div className="font-display text-base font-bold text-aqua">
-                {summary.nextDeliveryDate ?? "—"}
-              </div>
-              <div className="mt-1 text-[11px] uppercase tracking-widest text-muted">
-                Next drop
+              <p className="mt-2 text-sm text-muted">
+                {monthPct >= 100
+                  ? "Full glass! You've had a complete month of freshness. 🎉"
+                  : `Every delivery tops up your glass. ${
+                      MONTHLY_BOXES - delivered
+                    } more sips to a full month.`}
+              </p>
+              <div className="mt-4 grid grid-cols-3 gap-3">
+                <div className="rounded-2xl bg-white/5 p-3 text-center">
+                  <div className="font-display text-xl font-bold text-lime">
+                    {summary?.activeSubscriptions ?? 0}
+                  </div>
+                  <div className="mt-0.5 text-[10px] uppercase tracking-widest text-muted">
+                    Plans
+                  </div>
+                </div>
+                <div className="rounded-2xl bg-white/5 p-3 text-center">
+                  <div className="font-display text-xl font-bold">{delivered}</div>
+                  <div className="mt-0.5 text-[10px] uppercase tracking-widest text-muted">
+                    This month
+                  </div>
+                </div>
+                <div className="rounded-2xl bg-white/5 p-3 text-center">
+                  <div className="font-display text-sm font-bold text-aqua">
+                    {summary?.nextDeliveryDate ?? "—"}
+                  </div>
+                  <div className="mt-0.5 text-[10px] uppercase tracking-widest text-muted">
+                    Next drop
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        )}
+        </div>
 
         <h2 className="mb-3 mt-8 font-display text-lg font-bold">Your subscriptions</h2>
         <div className="space-y-3">
@@ -102,17 +133,22 @@ export default async function CustomerPortal() {
               No subscriptions yet. Message us on WhatsApp to start one.
             </div>
           ) : (
-            (subs ?? []).map((s) => (
-              <div key={s.id} className="flex items-center justify-between rounded-3xl glass p-5">
-                <div>
-                  <div className="font-semibold">{s.planName}</div>
-                  <div className="text-sm text-muted">
-                    ₹{s.price.toLocaleString("en-IN")}/mo · pauses used {s.pauseDaysUsed}/5
+            (subs ?? []).map((s) => {
+              const c = planColors(s.planName);
+              const subPct = s.status === "active" ? monthPct : s.status === "paused" ? monthPct : 0;
+              return (
+                <div key={s.id} className="flex items-center gap-4 rounded-3xl glass p-5">
+                  <JuiceGlass pct={subPct} color={c.fill} garnishColor={c.garnish} size={64} />
+                  <div className="flex-1">
+                    <div className="font-semibold">{s.planName}</div>
+                    <div className="text-sm text-muted">
+                      ₹{s.price.toLocaleString("en-IN")}/mo · pauses used {s.pauseDaysUsed}/5
+                    </div>
                   </div>
+                  <StatusPill status={s.status} />
                 </div>
-                <StatusPill status={s.status} />
-              </div>
-            ))
+              );
+            })
           )}
         </div>
 

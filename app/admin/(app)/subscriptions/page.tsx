@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { JuiceGlass } from "@/components/JuiceGlass";
+import { planColors } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
@@ -121,6 +123,9 @@ export default async function SubscriptionsPage({
             ) : (
               subs.map((s) => {
                 const c = custMap.get(s.customerId);
+                const pc = planColors(s.planName);
+                const glassPct =
+                  s.status === "active" ? 100 : s.status === "paused" ? 50 : 8;
                 return (
                   <tr key={s.id} className="border-b border-white/5">
                     <td className="px-4 py-3 font-medium">
@@ -129,7 +134,17 @@ export default async function SubscriptionsPage({
                         <span className="block text-xs text-muted">{c.phone}</span>
                       )}
                     </td>
-                    <td className="px-4 py-3">{s.planName}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2.5">
+                        <JuiceGlass
+                          pct={glassPct}
+                          color={pc.fill}
+                          garnishColor={pc.garnish}
+                          size={34}
+                        />
+                        <span>{s.planName}</span>
+                      </div>
+                    </td>
                     <td className="whitespace-nowrap px-4 py-3">
                       ₹{s.price.toLocaleString("en-IN")}
                     </td>
