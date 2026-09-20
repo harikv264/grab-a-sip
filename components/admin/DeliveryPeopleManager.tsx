@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { InviteLoginButton } from "@/components/admin/InviteLoginButton";
 
 type Person = {
   id: string;
@@ -103,17 +104,20 @@ export function DeliveryPeopleManager({ initial }: { initial: Person[] }) {
                   <td className="px-4 py-3 font-medium">{p.name}</td>
                   <td className="px-4 py-3 text-muted">{p.phone || "—"}</td>
                   <td className="px-4 py-3 text-muted">{p.area || "—"}</td>
-                  <td className="px-4 py-3 text-right">
-                    <button
-                      onClick={() => toggle(p)}
-                      className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
-                        p.active
-                          ? "bg-lime/15 text-lime hover:bg-lime/25"
-                          : "bg-white/10 text-muted hover:bg-white/15"
-                      }`}
-                    >
-                      {p.active ? "Active" : "Inactive"}
-                    </button>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-col items-end gap-2">
+                      <button
+                        onClick={() => toggle(p)}
+                        className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                          p.active
+                            ? "bg-lime/15 text-lime hover:bg-lime/25"
+                            : "bg-white/10 text-muted hover:bg-white/15"
+                        }`}
+                      >
+                        {p.active ? "Active" : "Inactive"}
+                      </button>
+                      <InviteLoginButton kind="rider" id={p.id} phone={p.phone} />
+                    </div>
                   </td>
                 </tr>
               ))

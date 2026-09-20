@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CustomerForm } from "@/components/admin/CustomerForm";
+import { InviteLoginButton } from "@/components/admin/InviteLoginButton";
 
 export const dynamic = "force-dynamic";
 
@@ -85,6 +86,17 @@ export default async function EditCustomerPage({
             source: c.source,
           }}
         />
+      )}
+
+      {c && (
+        <section className="mt-8 max-w-2xl">
+          <h2 className="font-display text-lg font-bold">Customer app access</h2>
+          <p className="mb-3 mt-1 text-sm text-muted">
+            Create a login so this customer can track their subscriptions &amp;
+            deliveries in the Grab A Sip app.
+          </p>
+          <InviteLoginButton kind="customer" id={c.id} phone={c.phone} />
+        </section>
       )}
     </>
   );

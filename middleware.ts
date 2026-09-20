@@ -31,17 +31,26 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const isLogin = path.startsWith("/admin/login");
 
-  if (path.startsWith("/admin") && !isLogin && !user) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/admin/login";
-    return NextResponse.redirect(url);
+  // Admin area — its own login page.
+  if (path.startsWith("/admin")) {
+    const isLogin = path.startsWith("/admin/login");
+    if (!isLogin && !user) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/admin/login";
+      return NextResponse.redirect(url);
+    }
+    if (isLogin && user) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/admin";
+      return NextResponse.redirect(url);
+    }
   }
-  // Already signed in but on the login page → send to the dashboard.
-  if (isLogin && user) {
+
+  // Rider / customer portals — shared /app/login.
+  if ((path.startsWith("/rider") || path.startsWith("/me")) && !user) {
     const url = request.nextUrl.clone();
-    url.pathname = "/admin";
+    url.pathname = "/app/login";
     return NextResponse.redirect(url);
   }
 
@@ -49,5 +58,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin/:path*", "/rider/:path*", "/me/:path*"],
 };
