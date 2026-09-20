@@ -4,6 +4,8 @@ import { userApiJson } from "@/lib/user-api";
 import { PortalHeader } from "@/components/portal/PortalHeader";
 import { JuiceGlass } from "@/components/JuiceGlass";
 import { planColors, MONTHLY_BOXES } from "@/lib/data";
+import { CountUp } from "@/components/fx/CountUp";
+import { JuiceBurst } from "@/components/fx/JuiceBurst";
 
 export const dynamic = "force-dynamic";
 
@@ -74,7 +76,8 @@ export default async function CustomerPortal() {
         <h1 className="font-display text-2xl font-bold">Hi there 👋</h1>
 
         {/* Hero: this month's glass filling up */}
-        <div className="mt-4 overflow-hidden rounded-4xl glass">
+        <div className="relative mt-4 overflow-hidden rounded-4xl glass">
+          <JuiceBurst active={monthPct >= 100} />
           <div className="flex flex-col items-center gap-6 p-6 sm:flex-row sm:p-8">
             <JuiceGlass
               pct={monthPct}
@@ -101,14 +104,16 @@ export default async function CustomerPortal() {
               <div className="mt-4 grid grid-cols-3 gap-3">
                 <div className="rounded-2xl bg-white/5 p-3 text-center">
                   <div className="font-display text-xl font-bold text-lime">
-                    {summary?.activeSubscriptions ?? 0}
+                    <CountUp value={summary?.activeSubscriptions ?? 0} />
                   </div>
                   <div className="mt-0.5 text-[10px] uppercase tracking-widest text-muted">
                     Plans
                   </div>
                 </div>
                 <div className="rounded-2xl bg-white/5 p-3 text-center">
-                  <div className="font-display text-xl font-bold">{delivered}</div>
+                  <div className="font-display text-xl font-bold">
+                    <CountUp value={delivered} />
+                  </div>
                   <div className="mt-0.5 text-[10px] uppercase tracking-widest text-muted">
                     This month
                   </div>

@@ -4,6 +4,8 @@ import { userApiJson } from "@/lib/user-api";
 import { PortalHeader } from "@/components/portal/PortalHeader";
 import { RiderDeliveryList } from "@/components/portal/RiderDeliveryList";
 import { JuiceGlass } from "@/components/JuiceGlass";
+import { CountUp } from "@/components/fx/CountUp";
+import { JuiceBurst } from "@/components/fx/JuiceBurst";
 
 export const dynamic = "force-dynamic";
 
@@ -50,7 +52,8 @@ export default async function RiderPortal() {
         <h1 className="font-display text-2xl font-bold">Today · {today}</h1>
 
         {/* Route-progress glass */}
-        <div className="mt-4 flex items-center gap-5 rounded-4xl glass p-6">
+        <div className="relative mt-4 flex items-center gap-5 overflow-hidden rounded-4xl glass p-6">
+          <JuiceBurst active={routeTotal > 0 && routePct >= 100} />
           <JuiceGlass pct={routePct} color="#C6FF4F" garnishColor="#38F5C9" size={120} showPct />
           <div className="flex-1">
             <div className="text-[11px] uppercase tracking-widest text-muted">
@@ -77,9 +80,9 @@ export default async function RiderPortal() {
               { n: stats.deliveredThisWeek, l: "This week" },
               { n: stats.deliveredThisMonth, l: "This month" },
             ].map((s) => (
-              <div key={s.l} className="rounded-3xl glass p-4 text-center">
+              <div key={s.l} className="sheen rounded-3xl glass p-4 text-center">
                 <div className={`font-display text-2xl font-bold ${s.c ?? "text-cream"}`}>
-                  {s.n}
+                  <CountUp value={s.n} />
                 </div>
                 <div className="mt-1 text-[11px] uppercase tracking-widest text-muted">
                   {s.l}

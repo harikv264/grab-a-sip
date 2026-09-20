@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { CountUp } from "@/components/fx/CountUp";
+import { Sparkline } from "@/components/fx/Sparkline";
 
 export const dynamic = "force-dynamic";
 
@@ -75,11 +77,37 @@ export default async function AdminDashboard() {
     .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""))
     .slice(0, 100);
 
+  // Build 14-day daily buckets for the KPI sparklines.
+  const DAYS = 14;
+  const dayKey = (d: Date) => d.toISOString().slice(0, 10);
+  const buckets = new Map<string, { all: number; ok: number; no: number }>();
+  const today = new Date();
+  for (let i = DAYS - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    buckets.set(dayKey(d), { all: 0, ok: 0, no: 0 });
+  }
+  for (const l of leads) {
+    if (!l.createdAt) continue;
+    const k = l.createdAt.slice(0, 10);
+    const b = buckets.get(k);
+    if (!b) continue;
+    b.all += 1;
+    if (l.serviceable) b.ok += 1;
+    else b.no += 1;
+  }
+  const series = Array.from(buckets.values());
+  const trendAll = series.map((b) => b.all);
+  const trendOk = series.map((b) => b.ok);
+  const trendNo = series.map((b) => b.no);
+
+  const maxDemand = Math.max(1, ...demand.map((d) => d.count));
+
   const stats = [
-    { n: leads.length, l: "Total checks" },
-    { n: serviceable.length, l: "In our areas", c: "text-lime" },
-    { n: undelivered.length, l: "Coming-soon requests", c: "text-berry" },
-    { n: demand.length, l: "Distinct areas wanted", c: "text-aqua" },
+    { n: leads.length, l: "Total checks", spark: trendAll, color: "#ECEAF6" },
+    { n: serviceable.length, l: "In our areas", c: "text-lime", spark: trendOk, color: "#C6FF4F" },
+    { n: undelivered.length, l: "Coming-soon requests", c: "text-berry", spark: trendNo, color: "#FF3E9A" },
+    { n: demand.length, l: "Distinct areas wanted", c: "text-aqua", spark: null, color: "#38F5C9" },
   ];
 
   return (
@@ -114,15 +142,22 @@ export default async function AdminDashboard() {
         {/* Stats */}
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {stats.map((s) => (
-            <div key={s.l} className="rounded-3xl glass p-5">
-              <div
-                className={`font-display text-3xl font-bold ${s.c ?? "text-cream"}`}
-              >
-                {s.n}
+            <div key={s.l} className="sheen flex flex-col justify-between rounded-3xl glass p-5">
+              <div>
+                <div className={`font-display text-3xl font-bold ${s.c ?? "text-cream"}`}>
+                  <CountUp value={s.n} />
+                </div>
+                <div className="mt-1 text-xs uppercase tracking-widest text-muted">
+                  {s.l}
+                </div>
               </div>
-              <div className="mt-1 text-xs uppercase tracking-widest text-muted">
-                {s.l}
-              </div>
+              {s.spark ? (
+                <div className="mt-3 -mb-1 flex justify-end">
+                  <Sparkline data={s.spark} color={s.color} width={120} height={34} />
+                </div>
+              ) : (
+                <div className="mt-3 text-[11px] text-dim">last 14 days →</div>
+              )}
             </div>
           ))}
         </div>
@@ -146,15 +181,21 @@ export default async function AdminDashboard() {
                   {demand.slice(0, 25).map((d, i) => (
                     <li
                       key={d.label + i}
-                      className="flex items-center justify-between gap-3 px-5 py-3"
+                      className="relative flex items-center justify-between gap-3 px-5 py-3"
                     >
-                      <div className="flex items-center gap-3">
+                      {/* demand-intensity bar */}
+                      <div
+                        aria-hidden
+                        className="pointer-events-none absolute inset-y-0 left-0 origin-left rounded-r-full bg-gradient-to-r from-berry/25 to-berry/5"
+                        style={{ width: `${(d.count / maxDemand) * 100}%` }}
+                      />
+                      <div className="relative flex items-center gap-3">
                         <span className="w-6 text-right font-mono text-sm text-dim">
                           {i + 1}
                         </span>
                         <span className="font-medium capitalize">{d.label}</span>
                       </div>
-                      <div className="flex items-center gap-3 text-sm">
+                      <div className="relative flex items-center gap-3 text-sm">
                         {d.phones > 0 && (
                           <span className="text-muted">📞 {d.phones}</span>
                         )}

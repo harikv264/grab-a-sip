@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabase-server";
 import { fetchMe } from "@/lib/admin-api";
 import { AdminHeader } from "@/components/admin/AdminHeader";
+import { Aurora } from "@/components/fx/Aurora";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +27,8 @@ export default async function AdminAppLayout({
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="relative min-h-screen">
+      <Aurora className="h-[420px]" />
       <AdminHeader email={user.email ?? ""} role={me?.role ?? null} />
       <main className="mx-auto max-w-6xl px-5 py-8">{children}</main>
     </div>

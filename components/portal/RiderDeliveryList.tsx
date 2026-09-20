@@ -51,10 +51,25 @@ export function RiderDeliveryList({ initial }: { initial: Delivery[] }) {
     );
   }
 
+  const dotColor: Record<string, string> = {
+    delivered: "bg-lime shadow-[0_0_12px_2px_rgba(198,255,79,0.55)]",
+    dispatched: "bg-mango shadow-[0_0_12px_2px_rgba(255,197,66,0.5)] animate-pulse",
+    failed: "bg-berry",
+    pending: "bg-white/25",
+  };
+
   return (
-    <div className="space-y-3">
+    <div className="relative space-y-3 pl-8">
+      {/* route spine */}
+      <div className="pointer-events-none absolute bottom-4 left-[11px] top-4 w-px bg-gradient-to-b from-white/5 via-white/15 to-white/5" />
       {rows.map((r) => (
-        <div key={r.id} className={`rounded-3xl glass p-5 ${busy === r.id ? "opacity-60" : ""}`}>
+        <div key={r.id} className={`relative rounded-3xl glass p-5 ${busy === r.id ? "opacity-60" : ""}`}>
+          {/* stop marker on the spine */}
+          <span
+            className={`absolute -left-[26px] top-6 h-3.5 w-3.5 rounded-full ring-4 ring-ink ${
+              dotColor[r.status] ?? "bg-white/25"
+            }`}
+          />
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className="font-semibold">{r.customerName}</div>

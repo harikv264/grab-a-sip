@@ -1,9 +1,11 @@
 import { Check, MessageCircle } from "@/components/icons";
 import { type Product, whatsappLink } from "@/lib/data";
+import { Tilt } from "@/components/fx/Tilt";
 
 export function ProductCard({ product }: { product: Product }) {
   return (
-    <div className="group relative flex h-full flex-col overflow-hidden rounded-4xl glass p-6 transition-all duration-500 hover:-translate-y-1.5 hover:border-white/25">
+    <Tilt className="h-full rounded-4xl">
+    <div className="group relative flex h-full flex-col overflow-hidden rounded-4xl glass p-6 transition-all duration-500 hover:border-white/25">
       {/* accent glow */}
       <div
         className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full opacity-40 blur-3xl transition-opacity duration-500 group-hover:opacity-70"
@@ -93,5 +95,6 @@ export function ProductCard({ product }: { product: Product }) {
         </div>
       </div>
     </div>
+    </Tilt>
   );
 }

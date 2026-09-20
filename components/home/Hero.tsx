@@ -4,6 +4,8 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { MessageCircle, ArrowRight, Sparkles } from "@/components/icons";
 import { whatsappLink } from "@/lib/data";
+import { CountUp } from "@/components/fx/CountUp";
+import { MagneticButton } from "@/components/fx/MagneticButton";
 
 const floaters = [
   { emoji: "🍊", className: "left-[6%] top-[24%]", anim: "animate-float" },
@@ -81,15 +83,15 @@ export function Hero() {
           variants={item}
           className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row"
         >
-          <a
+          <MagneticButton
             href={whatsappLink("Hi Grab A Sip! I'd like to start a plan.")}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-primary w-full sm:w-auto"
+            className="btn-primary sheen w-full sm:w-auto"
           >
             <MessageCircle size={18} strokeWidth={2.5} />
             Start on WhatsApp
-          </a>
+          </MagneticButton>
           <Link href="/#check" className="btn-ghost w-full sm:w-auto">
             Do we deliver to you?
             <ArrowRight size={18} />
@@ -102,17 +104,17 @@ export function Hero() {
           className="mx-auto mt-16 grid max-w-3xl grid-cols-2 gap-4 sm:grid-cols-4"
         >
           {[
-            { n: "6", l: "days a week" },
-            { n: "26", l: "boxes / month" },
-            { n: "0", l: "added sugar" },
-            { n: "5", l: "pause days" },
+            { n: 6, l: "days a week" },
+            { n: 26, l: "boxes / month" },
+            { n: 0, l: "g added sugar" },
+            { n: 5, l: "pause days" },
           ].map((s) => (
             <div
               key={s.l}
-              className="rounded-3xl glass px-4 py-5 text-center"
+              className="sheen rounded-3xl glass px-4 py-5 text-center"
             >
               <div className="font-display text-3xl font-bold text-lime sm:text-4xl">
-                {s.n}
+                <CountUp value={s.n} />
               </div>
               <div className="mt-1 text-xs uppercase tracking-widest text-muted">
                 {s.l}
