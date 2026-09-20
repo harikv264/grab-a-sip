@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { COUNTRIES, DEFAULT_COUNTRY, combineE164 } from "@/lib/countries";
 
 /** Admin action: create a phone login for a rider/customer and link the role. */
 export function InviteLoginButton({
@@ -13,6 +14,7 @@ export function InviteLoginButton({
   phone: string | null;
 }) {
   const [busy, setBusy] = useState(false);
+  const [dial, setDial] = useState(DEFAULT_COUNTRY.dial);
   const [result, setResult] = useState<{ phone: string; tempPassword: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,11 +22,19 @@ export function InviteLoginButton({
     setBusy(true);
     setError(null);
     setResult(null);
+    // If the stored number is already E.164 (+…), use it; else apply the picked country.
+    const raw = (phone ?? "").trim();
+    const e164 = raw.startsWith("+") ? raw : combineE164(dial, raw);
+    if (!e164) {
+      setError("This record needs a valid phone number first.");
+      setBusy(false);
+      return;
+    }
     try {
       const res = await fetch("/api/admin/invite", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ kind, id, phone }),
+        body: JSON.stringify({ kind, id, phone: e164 }),
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {
@@ -58,16 +68,33 @@ export function InviteLoginButton({
     );
   }
 
+  const isE164 = (phone ?? "").trim().startsWith("+");
   return (
     <div>
-      <button
-        onClick={invite}
-        disabled={busy || !phone}
-        className="btn-ghost text-sm disabled:opacity-50"
-        title={!phone ? "Add a phone number first" : undefined}
-      >
-        {busy ? "Creating…" : "Invite login"}
-      </button>
+      <div className="flex items-center gap-2">
+        {!isE164 && (
+          <select
+            value={dial}
+            onChange={(e) => setDial(e.target.value)}
+            aria-label="Country code"
+            className="rounded-full border border-white/15 bg-white/5 px-2.5 py-1.5 text-sm text-cream outline-none focus:border-lime/60"
+          >
+            {COUNTRIES.map((c) => (
+              <option key={c.code} value={c.dial}>
+                {c.flag} +{c.dial}
+              </option>
+            ))}
+          </select>
+        )}
+        <button
+          onClick={invite}
+          disabled={busy || !phone}
+          className="btn-ghost text-sm disabled:opacity-50"
+          title={!phone ? "Add a phone number first" : undefined}
+        >
+          {busy ? "Creating…" : "Invite login"}
+        </button>
+      </div>
       {!phone && (
         <p className="mt-1 text-xs text-muted">Add a phone number first.</p>
       )}
