@@ -25,6 +25,7 @@
  */
 
 import { readFileSync } from "node:fs";
+import { randomUUID } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 
 // ── Load .env.local if present (so you don't have to export vars) ──
@@ -82,24 +83,27 @@ async function ensureAuthUser(email) {
 }
 
 // ── Domain helpers (idempotent) ───────────────────────────────────
-async function upsertCustomer(c) {
+// NOTE: these tables use app-generated UUID ids (JPA @GeneratedValue), so there
+// is NO DB default — every insert must supply an id. We find-or-insert (rather
+// than upsert) so re-runs never rewrite a primary key.
+async function ensureCustomer(c) {
+  const found = await db.from("customers").select("*").eq("phone", c.phone).maybeSingle();
+  if (found.data) return found.data;
   const { data, error } = await db
     .from("customers")
-    .upsert(
-      {
-        name: c.name,
-        phone: c.phone,
-        locality: c.locality,
-        pincode: c.pincode,
-        address_status: "verified",
-        source: "manual",
-        flat_house: c.flatHouse,
-        notes: "TEST DATA — created by seed-test-users.mjs",
-        created_at: now(),
-        updated_at: now(),
-      },
-      { onConflict: "phone" }
-    )
+    .insert({
+      id: randomUUID(),
+      name: c.name,
+      phone: c.phone,
+      locality: c.locality,
+      pincode: c.pincode,
+      address_status: "verified",
+      source: "manual",
+      flat_house: c.flatHouse,
+      notes: "TEST DATA — created by seed-test-users.mjs",
+      created_at: now(),
+      updated_at: now(),
+    })
     .select()
     .single();
   if (error) throw error;
@@ -111,7 +115,7 @@ async function ensureDeliveryPerson(p) {
   if (found.data) return found.data;
   const { data, error } = await db
     .from("delivery_persons")
-    .insert({ name: p.name, phone: p.phone, area: p.area, active: true, created_at: now() })
+    .insert({ id: randomUUID(), name: p.name, phone: p.phone, area: p.area, active: true, created_at: now() })
     .select()
     .single();
   if (error) throw error;
@@ -129,6 +133,7 @@ async function ensureSubscription(s) {
   const { data, error } = await db
     .from("subscriptions")
     .insert({
+      id: randomUUID(),
       customer_id: s.customerId,
       plan_code: s.planCode,
       plan_name: s.planName,
@@ -195,13 +200,23 @@ async function seedDeliveries({ sub, customer, riderId, todayStatus }) {
     }`.trim(),
     plan_name: sub.plan_name,
   };
-  for (const date of past) rows.push({ ...snapshot, subscription_id: sub.id, date, status: "delivered", created_at: now(), updated_at: now() });
-  rows.push({ ...snapshot, subscription_id: sub.id, date: todayIso, status: todayStatus, created_at: now(), updated_at: now() });
-  for (const date of future) rows.push({ ...snapshot, subscription_id: sub.id, date, status: "pending", created_at: now(), updated_at: now() });
+  const mk = (date, status) => ({
+    ...snapshot,
+    id: randomUUID(),
+    subscription_id: sub.id,
+    date,
+    status,
+    created_at: now(),
+    updated_at: now(),
+  });
+  for (const date of past) rows.push(mk(date, "delivered"));
+  rows.push(mk(todayIso, todayStatus));
+  for (const date of future) rows.push(mk(date, "pending"));
 
-  const { error } = await db
-    .from("deliveries")
-    .upsert(rows, { onConflict: "subscription_id,date" });
+  // Reset this subscription's deliveries first, so re-runs stay clean and
+  // "today" moves correctly (no id-rewrite / unique-constraint fights).
+  await db.from("deliveries").delete().eq("subscription_id", sub.id);
+  const { error } = await db.from("deliveries").insert(rows);
   if (error) throw error;
   return rows.length;
 }
@@ -225,7 +240,7 @@ async function main() {
   });
 
   console.log("→ Creating test customer + subscription + deliveries…");
-  const customer = await upsertCustomer({
+  const customer = await ensureCustomer({
     name: "Test Customer",
     phone: "+919000000001",
     locality: "Gachibowli",
@@ -247,7 +262,7 @@ async function main() {
     { name: "Sample — Meera", phone: "+919000000012", locality: "Madhapur", planCode: "classic", planName: "Classic Juice Plan", price: 1350, todayStatus: "dispatched" },
   ];
   for (const s of samples) {
-    const c = await upsertCustomer({ name: s.name, phone: s.phone, locality: s.locality, pincode: "500081", flatHouse: "Sample address" });
+    const c = await ensureCustomer({ name: s.name, phone: s.phone, locality: s.locality, pincode: "500081", flatHouse: "Sample address" });
     const su = await ensureSubscription({ customerId: c.id, planCode: s.planCode, planName: s.planName, price: s.price, startDate: startIso });
     await seedDeliveries({ sub: su, customer: c, riderId: rider.id, todayStatus: s.todayStatus });
   }
