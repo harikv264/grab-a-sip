@@ -8,11 +8,12 @@ export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [phase, setPhase] = useState<"idle" | "submitting" | "redirecting">("idle");
+  const busy = phase !== "idle";
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setPhase("submitting");
     setError(null);
     try {
       const res = await fetch("/api/admin/login", {
@@ -23,14 +24,18 @@ export default function AdminLoginPage() {
       const data = await res.json();
       if (!res.ok || !data.ok) {
         setError(data.error || "Sign in failed.");
-        setLoading(false);
+        setPhase("idle");
         return;
       }
+      // Sign-in succeeded. Loading /admin can take a moment while the backend
+      // wakes from idle, so switch to an explicit "redirecting" state rather
+      // than leaving the button looking stuck on "Signing in…".
+      setPhase("redirecting");
       router.push("/admin");
       router.refresh();
     } catch {
       setError("Something went wrong. Please try again.");
-      setLoading(false);
+      setPhase("idle");
     }
   };
 
@@ -78,12 +83,23 @@ export default function AdminLoginPage() {
             </p>
           )}
 
+          {phase === "redirecting" && (
+            <p className="rounded-xl bg-lime/10 px-3 py-2 text-sm text-lime/90">
+              Signed in ✓ Opening your console… the server can take a few seconds
+              to wake up on the first load.
+            </p>
+          )}
+
           <button
             type="submit"
-            disabled={loading}
+            disabled={busy}
             className="btn-primary mt-1 disabled:opacity-60"
           >
-            {loading ? "Signing in…" : "Sign in"}
+            {phase === "redirecting"
+              ? "Opening dashboard…"
+              : phase === "submitting"
+              ? "Signing in…"
+              : "Sign in"}
           </button>
         </form>
 
